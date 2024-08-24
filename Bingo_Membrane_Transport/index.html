@@ -1,67 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Membrane Transport Bingo</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        .bingoTable { border-collapse: collapse; margin: 20px auto; }
-        .bingoTable td { border: 1px solid #000; padding: 10px; text-align: center; width: 120px; height: 120px; }
-        .marked { background-color: yellow; }
-        .blink { animation: blink-animation 1s steps(2, start) infinite; }
-        @keyframes blink-animation { to { visibility: hidden; } }
-        #bingoContainer { display: flex; justify-content: center; flex-wrap: wrap; }
-        .bingoTable { margin: 10px; }
-        #modeButtons { text-align: center; margin-bottom: 20px; }
-        .modeButton { padding: 10px 20px; margin: 0 10px; cursor: pointer; border: none; }
-        .selected { background-color: blue; color: white; }
-        .unselected { background-color: gray; color: black; }
-        video { width: 100%; height: 100%; object-fit: contain; }
-        img { width: 100%; height: 100%; object-fit: contain; }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        .bingoTable {
+            border-collapse: collapse;
+            margin: 20px auto;
+            table-layout: fixed;
+            width: 90%;
+        }
+
+        .bingoTable td {
+            border: 1px solid #000;
+            padding: 10px;
+            text-align: center;
+            width: 18%;
+            height: 150px;
+            vertical-align: middle;
+            font-size: 14px;
+            word-wrap: break-word;
+        }
+
+        .marked {
+            background-color: yellow;
+        }
+
+        .blink {
+            animation: blink-animation 1s steps(2, start) infinite;
+        }
+
+        @keyframes blink-animation {
+            to {
+                visibility: hidden;
+            }
+        }
+
+        #bingoContainer {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .bingoTable {
+            margin: 10px;
+        }
+
+        #modeButtons {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .modeButton {
+            padding: 10px 20px;
+            margin: 0 10px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .selected {
+            background-color: blue;
+            color: white;
+        }
+
+        .unselected {
+            background-color: gray;
+            color: black;
+        }
+
+        img,
+        video {
+            max-width: 100%;
+            max-height: 100%;
+        }
     </style>
 </head>
+
 <body>
-    <h1 style="text-align: center;">Membrane Transport Bingo</h1>
+    <h1>Membrane Transport Bingo</h1>
     <div id="modeButtons">
         <button id="basicButton" class="modeButton selected">Basic</button>
         <button id="challengeButton" class="modeButton unselected">Challenge</button>
     </div>
     <div id="bingoContainer"></div>
+
     <script>
-        const descriptions = [
-            "This process moves water across the cell membrane.",
-            "A protein channel specifically for water molecules.",
-            "The process by which a cell engulfs large particles.",
-            "A vesicle releases contents outside of the cell.",
-            "Transport that does not require energy.",
-            "The molecule that provides energy for active transport.",
-            "Transport that requires energy.",
-            "A cell taking in large particles by engulfing them.",
-            "This protein aids in moving large molecules across the membrane.",
-            "Movement of molecules from high to low concentration.",
-            "Movement against a concentration gradient.",
-            "Allows some substances to pass while blocking others.",
-            "The force driving diffusion across the membrane.",
-            "Transport that involves vesicles fusing with the membrane.",
-            "The main lipid component of the cell membrane."
-        ];
+        const termsWithMedia = {
+            "Cell Membrane": {
+                type: "image",
+                src: "https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Cell%20Membrane.png"
+            },
+            "Concentration Gradient": {
+                type: "image",
+                src: "https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Concentration%20Gradient.png"
+            },
+            "Osmosis": {
+                type: "video",
+                src: "https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Osmosis.mp4"
+            },
+            "Endocytosis": {
+                type: "video",
+                src: "https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Endocytosis.mp4"
+            },
+            "Exocytosis": {
+                type: "video",
+                src: "https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Exocytosis.mp4"
+            },
+            "Selective Permeability": {
+                type: "video",
+                src: "https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Selective%20Permeability.mp4"
+            },
+            "ATP": {
+                type: "image",
+                src: "https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/ATP.png"
+            }
+        };
 
         const terms = [
-            "Osmosis", "Aquaporin", "Phagocytosis", "Exocytosis", "Passive Transport", "ATP", "Active Transport",
-            "Endocytosis", "Channel Protein", "Diffusion", "Facilitated Diffusion", "Selective Permeability",
-            "Concentration Gradient", "Vesicle Transport", "Phospholipid"
+            "Cell Membrane", "Concentration Gradient", "Osmosis", "Endocytosis", "Exocytosis", "Selective Permeability", 
+            "ATP", "Phospholipid", "Channel Protein", "Active Transport", "Facilitated Diffusion", "Passive Transport", 
+            "Diffusion", "Aquaporin", "Phagocytosis", "Vesicle Transport"
         ];
-
-        const mediaFiles = {
-            "Osmosis": "<video src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Osmosis.mp4' autoplay loop></video>",
-            "Endocytosis": "<video src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Endocytosis.mp4' autoplay loop></video>",
-            "Exocytosis": "<video src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Exocytosis.mp4' autoplay loop></video>",
-            "Selective Permeability": "<video src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Selective Permeability.mp4' autoplay loop></video>",
-            "Concentration Gradient": "<img src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Concentration Gradient.png' />",
-            "Cell Membrane": "<img src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Cell Membrane.png' />",
-            "ATP": "<img src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/ATP.png' />"
-        };
 
         // Generate 200 random colors
         const generateColors = (numColors) => {
@@ -78,7 +144,7 @@
         let mode = 'Basic';
 
         const bingoAudio = new Audio('https://cdn.glitch.global/57ef4f68-625c-4d2f-ba55-2f6832101365/LD%20Bingo.mp3?v=1722697876282');
-        bingoAudio.loop = true;
+        bingoAudio.loop = true; // Loop the audio
 
         const stopAudio = () => {
             bingoAudio.pause();
@@ -117,10 +183,22 @@
 
             cells.forEach((cell, index) => {
                 const term = terms[index];
-                const showMedia = Math.random() < 0.5 && mediaFiles[term]; // Randomly show media or term
+                const randomDecision = Math.random() < 0.5;
 
-                if (showMedia) {
-                    cell.innerHTML = mediaFiles[term];
+                if (termsWithMedia[term] && randomDecision) {
+                    const media = termsWithMedia[term];
+                    if (media.type === "image") {
+                        const img = document.createElement("img");
+                        img.src = media.src;
+                        cell.appendChild(img);
+                    } else if (media.type === "video") {
+                        const video = document.createElement("video");
+                        video.src = media.src;
+                        video.autoplay = true;
+                        video.loop = true;
+                        video.muted = true;
+                        cell.appendChild(video);
+                    }
                 } else {
                     cell.textContent = term;
                 }
@@ -199,4 +277,5 @@
         window.addEventListener('beforeunload', stopAudio);
     </script>
 </body>
+
 </html>
