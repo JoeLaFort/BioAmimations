@@ -1,1 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Membrane Transport Bingo</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .bingoTable { border-collapse: collapse; margin: 20px auto; }
+        .bingoTable td { border: 1px solid #000; padding: 10px; text-align: center; width: 120px; height: 120px; }
+        .marked { background-color: yellow; }
+        .blink { animation: blink-animation 1s steps(2, start) infinite; }
+        @keyframes blink-animation { to { visibility: hidden; } }
+        #bingoContainer { display: flex; justify-content: center; flex-wrap: wrap; }
+        .bingoTable { margin: 10px; }
+        #modeButtons { text-align: center; margin-bottom: 20px; }
+        .modeButton { padding: 10px 20px; margin: 0 10px; cursor: pointer; border: none; }
+        .selected { background-color: blue; color: white; }
+        .unselected { background-color: gray; color: black; }
+        video { width: 100%; height: 100%; object-fit: contain; }
+        img { width: 100%; height: 100%; object-fit: contain; }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">Membrane Transport Bingo</h1>
+    <div id="modeButtons">
+        <button id="basicButton" class="modeButton selected">Basic</button>
+        <button id="challengeButton" class="modeButton unselected">Challenge</button>
+    </div>
+    <div id="bingoContainer"></div>
+    <script>
+        const descriptions = [
+            "This process moves water across the cell membrane.",
+            "A protein channel specifically for water molecules.",
+            "The process by which a cell engulfs large particles.",
+            "A vesicle releases contents outside of the cell.",
+            "Transport that does not require energy.",
+            "The molecule that provides energy for active transport.",
+            "Transport that requires energy.",
+            "A cell taking in large particles by engulfing them.",
+            "This protein aids in moving large molecules across the membrane.",
+            "Movement of molecules from high to low concentration.",
+            "Movement against a concentration gradient.",
+            "Allows some substances to pass while blocking others.",
+            "The force driving diffusion across the membrane.",
+            "Transport that involves vesicles fusing with the membrane.",
+            "The main lipid component of the cell membrane."
+        ];
 
+        const terms = [
+            "Osmosis", "Aquaporin", "Phagocytosis", "Exocytosis", "Passive Transport", "ATP", "Active Transport",
+            "Endocytosis", "Channel Protein", "Diffusion", "Facilitated Diffusion", "Selective Permeability",
+            "Concentration Gradient", "Vesicle Transport", "Phospholipid"
+        ];
+
+        const mediaFiles = {
+            "Osmosis": "<video src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Osmosis.mp4' autoplay loop></video>",
+            "Endocytosis": "<video src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Endocytosis.mp4' autoplay loop></video>",
+            "Exocytosis": "<video src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Exocytosis.mp4' autoplay loop></video>",
+            "Selective Permeability": "<video src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Selective Permeability.mp4' autoplay loop></video>",
+            "Concentration Gradient": "<img src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Concentration Gradient.png' />",
+            "Cell Membrane": "<img src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Cell Membrane.png' />",
+            "ATP": "<img src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/ATP.png' />"
+        };
+
+        // Generate 200 random colors
+        const generateColors = (numColors) => {
+            const colors = [];
+            for (let i = 0; i < numColors; i++) {
+                const color = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
+                colors.push(color);
+            }
+            return colors;
+        };
+
+        const colors = generateColors(200);
+        let selectedColor;
+        let mode = 'Basic';
+
+        const bingoAudio = new Audio('https://cdn.glitch.global/57ef4f68-625c-4d2f-ba55-2f6832101365/LD%20Bingo.mp3?v=1722697876282');
+        bingoAudio.loop = true;
+
+        const stopAudio = () => {
+            bingoAudio.pause();
+            bingoAudio.currentTime = 0;
+        };
+
+        const checkBingo = (cells) => {
+            const lines = [
+                // Horizontal
+                [0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], [15, 16, 17, 18, 19], [20, 21, 22, 23, 24],
+                // Vertical
+                [0, 5, 10, 15, 20], [1, 6, 11, 16, 21], [2, 7, 12, 17, 22], [3, 8, 13, 18, 23], [4, 9, 14, 19, 24],
+                // Diagonal
+                [0, 6, 12, 18, 24], [4, 8, 12, 16, 20]
+            ];
+
+            for (let line of lines) {
+                if (line.every(index => cells[index].classList.contains('marked'))) {
+                    line.forEach(index => {
+                        cells[index].classList.add('blink');
+                    });
+                    bingoAudio.play();
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        const generateUniqueBoard = (id) => {
+            const table = document.getElementById(id);
+            const cells = Array.from(table.getElementsByTagName('td'));
+
+            shuffle(terms);
+            shuffle(colors);
+            selectedColor = colors[Math.floor(Math.random() * colors.length)];
+
+            cells.forEach((cell, index) => {
+                const term = terms[index];
+                const showMedia = Math.random() < 0.5 && mediaFiles[term]; // Randomly show media or term
+
+                if (showMedia) {
+                    cell.innerHTML = mediaFiles[term];
+                } else {
+                    cell.textContent = term;
+                }
+
+                cell.style.backgroundColor = "";
+                cell.classList.remove("marked", "blink");
+
+                cell.onclick = () => {
+                    if (!cell.classList.contains('marked')) {
+                        cell.classList.add('marked');
+                        cell.style.backgroundColor = selectedColor;
+                    } else {
+                        cell.classList.remove('marked');
+                        cell.style.backgroundColor = "";
+                    }
+                    checkBingo(cells);
+                };
+            });
+        };
+
+        const shuffle = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        };
+
+        const createTable = (id) => {
+            const table = document.createElement('table');
+            table.id = id;
+            table.className = 'bingoTable';
+
+            for (let i = 0; i < 5; i++) {
+                const row = table.insertRow();
+                for (let j = 0; j < 5; j++) {
+                    const cell = row.insertCell();
+                    cell.className = 'bingo-cell';
+                }
+            }
+            return table;
+        };
+
+        const setMode = (newMode) => {
+            stopAudio();
+            mode = newMode;
+            const container = document.getElementById('bingoContainer');
+            container.innerHTML = '';
+
+            if (mode === 'Basic') {
+                container.appendChild(createTable('bingoTable'));
+                generateUniqueBoard('bingoTable');
+                document.getElementById('basicButton').classList.add('selected');
+                document.getElementById('basicButton').classList.remove('unselected');
+                document.getElementById('challengeButton').classList.add('unselected');
+                document.getElementById('challengeButton').classList.remove('selected');
+            } else {
+                const board1 = createTable('bingoTable1');
+                const board2 = createTable('bingoTable2');
+                container.appendChild(board1);
+                container.appendChild(board2);
+                generateUniqueBoard('bingoTable1');
+                generateUniqueBoard('bingoTable2');
+                document.getElementById('basicButton').classList.add('unselected');
+                document.getElementById('basicButton').classList.remove('selected');
+                document.getElementById('challengeButton').classList.add('selected');
+                document.getElementById('challengeButton').classList.remove('unselected');
+            }
+        };
+
+        document.getElementById('basicButton').addEventListener('click', () => setMode('Basic'));
+        document.getElementById('challengeButton').addEventListener('click', () => setMode('Challenge'));
+
+        // Initial load
+        setMode('Basic');
+
+        window.addEventListener('beforeunload', stopAudio);
+    </script>
+</body>
+</html>
