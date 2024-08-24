@@ -9,7 +9,7 @@
 <body>
     <h1>Embedded SWF File</h1>
     <div>
-        <embed src=Membrane Transport.swf width="800" height="600">
+        <embed src="https://github.com/JoeLaFort/BioAnimations/raw/4b3c2a7af868337c26e7d8713efe5abd17c7270d/Membrane%20Transport.swf" width="800" height="600">
     </div>
 </body>
 </html>
