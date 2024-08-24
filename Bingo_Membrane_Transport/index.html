@@ -61,6 +61,24 @@
             height: 100%;
             object-fit: cover;
         }
+
+        #bingoContainer {
+            max-width: 90vw;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        #bingoContainer > div {
+            display: flex;
+            margin: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        #bingoContainer table {
+            margin: 10px;
+        }
     </style>
 </head>
 
@@ -111,17 +129,22 @@
                 cell.innerHTML = ""; // Clear any existing content
 
                 if (item.resource) {
-                    if (item.type === "video") {
-                        const video = document.createElement("video");
-                        video.src = item.resource;
-                        video.loop = true;
-                        video.autoplay = true;
-                        video.muted = true;
-                        cell.appendChild(video);
-                    } else if (item.type === "image") {
-                        const img = document.createElement("img");
-                        img.src = item.resource;
-                        cell.appendChild(img);
+                    const shouldShowTerm = Math.random() < 0.5;
+                    if (shouldShowTerm) {
+                        cell.textContent = item.term;
+                    } else {
+                        if (item.type === "video") {
+                            const video = document.createElement("video");
+                            video.src = item.resource;
+                            video.loop = true;
+                            video.autoplay = true;
+                            video.muted = true;
+                            cell.appendChild(video);
+                        } else if (item.type === "image") {
+                            const img = document.createElement("img");
+                            img.src = item.resource;
+                            cell.appendChild(img);
+                        }
                     }
                 } else {
                     cell.textContent = item.term;
@@ -174,10 +197,18 @@
                 document.getElementById('challengeButton').classList.add('unselected');
                 document.getElementById('challengeButton').classList.remove('selected');
             } else {
+                const boardContainer = document.createElement("div");
+                boardContainer.style.display = "flex";
+                boardContainer.style.justifyContent = "center";
+
                 const board1 = createTable('bingoTable1');
                 const board2 = createTable('bingoTable2');
-                container.appendChild(board1);
-                container.appendChild(board2);
+
+                boardContainer.appendChild(board1);
+                boardContainer.appendChild(board2);
+
+                container.appendChild(boardContainer);
+
                 generateUniqueBoard('bingoTable1');
                 generateUniqueBoard('bingoTable2');
                 document.getElementById('basicButton').classList.add('unselected');
