@@ -30,11 +30,10 @@
             "Diffusion", "Facilitated Diffusion", "Active Transport", "Endocytosis", "Exocytosis", 
             "Channel Protein", "Carrier Protein", "ATP", "Cell Membrane", "Pinocytosis", "Passive Transport", 
             "Energy Requirement", "Concentration Gradient", "Equilibrium", "Selective Permeability", 
-            "Aquaporin", "Phagocytosis", "Vesicle Transport", "Phospholipid"
+            "Aquaporin", "Phagocytosis", "Vesicle Transport", "Phospholipid", "Osmosis"
         ];
 
         const termMedia = {
-            "Diffusion": "<img src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Concentration%20Gradient.png' style='width: 100%; height: 100%; object-fit: contain;' />",
             "Osmosis": "<video src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Osmosis.mp4' style='width: 100%; height: 100%; object-fit: cover;' autoplay loop muted></video>",
             "Cell Membrane": "<img src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Cell%20Membrane.png' style='width: 100%; height: 100%; object-fit: cover;' />",
             "ATP": "<img src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/ATP.png' style='width: 100%; height: 100%; object-fit: cover;' />",
@@ -45,10 +44,11 @@
         };
 
         const fillBingoBoard = (terms) => {
-            const board = [];
+            const board = [...terms];
             while (board.length < 25) {
-                shuffle(terms);
-                for (let term of terms) {
+                const remainingTerms = terms.filter(term => board.filter(t => t === term).length < 2);
+                shuffle(remainingTerms);
+                for (let term of remainingTerms) {
                     if (board.length < 25) board.push(term);
                 }
             }
