@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,166 +7,133 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
         }
-
         .bingoTable {
             border-collapse: collapse;
             margin: 20px auto;
         }
-
         .bingoTable td {
             border: 1px solid #000;
-            padding: 0;
             text-align: center;
-            width: 200px;
+            width: 150px;
             height: 150px;
-            vertical-align: middle;
-            position: relative;
             overflow: hidden;
         }
-
-        .flip-container {
-            perspective: 1000px;
+        .marked {
+            background-color: yellow;
         }
-
-        .flipper {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            transition: transform 0.6s;
-            transform-style: preserve-3d;
+        .blink {
+            animation: blink-animation 1s steps(2, start) infinite;
         }
-
-        .flip-container.flip .flipper {
-            transform: rotateY(180deg);
+        @keyframes blink-animation {
+            to {
+                visibility: hidden;
+            }
         }
-
-        .front,
-        .back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-        }
-
-        .back {
-            transform: rotateY(180deg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px;
-            box-sizing: border-box;
-            font-size: 14px;
-        }
-
-        .content-image {
-            max-width: 100%;
-            max-height: 100%;
-            display: block;
-            margin: 0 auto;
-        }
-
-        .content-video {
-            width: 100%;
-            height: 100%;
-        }
-
         #bingoContainer {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
+            margin-top: 20px;
         }
-
-        .bingoTable {
-            margin: 10px;
-        }
-
         #modeButtons {
             text-align: center;
             margin-bottom: 20px;
         }
-
         .modeButton {
             padding: 10px 20px;
             margin: 0 10px;
             cursor: pointer;
             border: none;
-            background-color: gray;
+            font-size: 1rem;
+        }
+        .selected {
+            background-color: blue;
             color: white;
         }
-
-        .modeButton.selected {
-            background-color: blue;
-        }
-
-        #soloToggle {
-            display: inline-flex;
-            border: 2px solid #000;
-            border-radius: 25px;
-            cursor: pointer;
-            margin-bottom: 20px;
-        }
-
-        #soloToggle span {
-            padding: 10px 20px;
-            color: white;
-        }
-
-        #soloTerms {
+        .unselected {
             background-color: gray;
+            color: black;
         }
-
-        #soloDefinitions {
-            background-color: gray;
+        .flip-container {
+            perspective: 1000px;
         }
-
-        #soloToggle.selected-left #soloTerms {
-            background-color: blue;
+        .flip-card {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            position: relative;
         }
-
-        #soloToggle.selected-right #soloDefinitions {
-            background-color: blue;
+        .flip-card-inner {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
         }
-
-        #message {
-            text-align: center;
-            font-size: 16px;
-            margin-bottom: 20px;
+        .flip-card-front {
+            z-index: 2;
+        }
+        .flip-card-back {
+            transform: rotateY(180deg);
+            z-index: 1;
+        }
+        .flipped .flip-card {
+            transform: rotateY(180deg);
         }
     </style>
 </head>
-
 <body>
-    <h1 style="text-align: center;">Membrane Transport Bingo</h1>
+    <h1>Membrane Transport Bingo</h1>
     <div id="modeButtons">
         <button id="basicButton" class="modeButton selected">Basic</button>
-        <button id="challengeButton" class="modeButton">Challenge</button>
-        <div id="soloToggle" class="modeButton">
-            <span id="soloTerms">Solo - Terms</span>
-            <span id="soloDefinitions">Solo - Definitions</span>
-        </div>
+        <button id="challengeButton" class="modeButton unselected">Challenge</button>
+        <button id="soloTermsButton" class="modeButton unselected">Solo - Terms</button>
+        <button id="soloDefinitionsButton" class="modeButton unselected">Solo - Definitions</button>
     </div>
-    <div id="message">Click each cell to show its answer.</div>
     <div id="bingoContainer"></div>
-
     <script>
         const terms = [
-            { term: "Diffusion", definition: "The movement of particles from an area of high concentration to low concentration.", media: "" },
-            { term: "Osmosis", definition: "The diffusion of water through a selectively permeable membrane.", media: "https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/osmosis.mp4" },
-            { term: "Active Transport", definition: "The movement of molecules across a membrane via energy input.", media: "" },
-            { term: "Facilitated Diffusion", definition: "The process of passive transport through protein channels.", media: "https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/selective_permeability.mp4" },
-            { term: "Endocytosis", definition: "The process by which cells engulf large particles.", media: "https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/endocytosis.mp4" },
-            { term: "Phagocytosis", definition: "A type of endocytosis where cells ingest large particles.", media: "" },
-            { term: "Channel Protein", definition: "A protein that allows the transport of specific substances across a membrane.", media: "" },
-            { term: "Carrier Protein", definition: "A protein that transports specific molecules across cell membranes.", media: "" },
-            { term: "Cell Membrane", definition: "A biological membrane that separates the interior of cells from the outside environment.", media: "https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/cell_membrane.png" },
-            { term: "Vesicle Transport", definition: "The movement of materials within or between cells via vesicles.", media: "" },
-            { term: "Aquaporin", definition: "A water channel protein that allows the movement of water molecules across the membrane.", media: "" },
-            { term: "ATP", definition: "A molecule that carries energy within cells.", media: "https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/atp.png" },
-            { term: "Passive Transport", definition: "The movement of substances across a membrane without energy input.", media: "" },
-            { term: "Concentration Gradient", definition: "The gradual difference in concentration of a substance in a solution.", media: "https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/concentration_gradient.png" },
-            { term: "Selective Permeability", definition: "The property of a membrane that allows some substances to pass through while others cannot.", media: "https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/selective_permeability.mp4" },
+            "Diffusion", "Facilitated Diffusion", "Active Transport", "Endocytosis", "Exocytosis",
+            "Channel Protein", "Carrier Protein", "ATP", "Phospholipid Bilayer", "Pinocytosis", "Passive Transport",
+            "Energy Requirement", "Concentration Gradient", "Equilibrium", "Selective Permeability",
+            "Aquaporin", "Phagocytosis", "Vesicle Transport", "Osmosis"
         ];
+
+        const termMedia = {
+            "Osmosis": "<video src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Osmosis.mp4' style='width: 100%; height: 100%; object-fit: cover;' autoplay loop muted></video>",
+            "Phospholipid Bilayer": "<img src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Phospholipid%20Bilayer.png' style='width: 100%; height: 100%; object-fit: cover;' />",
+            "ATP": "<img src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/ATP.png' style='width: 100%; height: 100%; object-fit: cover;' />",
+            "Endocytosis": "<video src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Endocytosis.mp4' style='width: 100%; height: 100%; object-fit: cover;' autoplay loop muted></video>",
+            "Exocytosis": "<video src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Exocytosis.mp4' style='width: 100%; height: 100%; object-fit: cover;' autoplay loop muted></video>",
+            "Selective Permeability": "<video src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Selective%20Permeability.mp4' style='width: 100%; height: 100%; object-fit: cover;' autoplay loop muted></video>",
+            "Concentration Gradient": "<img src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Concentration%20Gradient.png' style='width: 100%; height: 100%; object-fit: contain;' />"
+        };
+
+        const definitions = {
+            "Osmosis": "The diffusion of water through a selectively permeable membrane.",
+            "Phospholipid Bilayer": "The primary structure of cell membranes, consisting of two layers of phospholipids.",
+            "ATP": "A molecule that stores and transfers energy within cells.",
+            "Endocytosis": "The process by which a cell takes in material by engulfing it with the cell membrane.",
+            "Exocytosis": "The process by which a cell expels material through vesicles.",
+            "Selective Permeability": "The ability of a cell membrane to allow certain substances to pass while blocking others.",
+            "Concentration Gradient": "The gradual difference in concentration of a substance in a solution."
+        };
+
+        const fillBingoBoard = (terms) => {
+            const board = [...terms];
+            while (board.length < 25) {
+                const remainingTerms = terms.filter(term => board.filter(t => t === term).length < 2);
+                shuffle(remainingTerms);
+                for (let term of remainingTerms) {
+                    if (board.length < 25) board.push(term);
+                }
+            }
+            return board;
+        };
 
         const shuffle = (array) => {
             for (let i = array.length - 1; i > 0; i--) {
@@ -176,102 +142,138 @@
             }
         };
 
-        const createBoard = (mode) => {
-            const container = document.getElementById("bingoContainer");
-            container.innerHTML = "";
-            const table = document.createElement("table");
-            table.className = "bingoTable";
+        const generateBoardContent = (filledTerms, mode) => {
+            const board = [];
+            const usedMedia = {};
+            const availableDefinitions = { ...definitions };
 
-            let cellsUsed = [];
-            shuffle(terms);
+            filledTerms.forEach(term => {
+                let cellContent = term;
+
+                if (mode === 'Solo - Terms') {
+                    if (termMedia[term] && !usedMedia[term]) {
+                        cellContent = termMedia[term];
+                        usedMedia[term] = true;
+                    }
+                } else if (mode === 'Solo - Definitions' && availableDefinitions[term]) {
+                    cellContent = availableDefinitions[term];
+                    delete availableDefinitions[term];
+                }
+
+                board.push({ term, content: cellContent });
+            });
+
+            return board;
+        };
+
+        const flipCard = (cell, contentFront, contentBack) => {
+            const flipContainer = document.createElement('div');
+            flipContainer.className = 'flip-container';
+
+            const flipCard = document.createElement('div');
+            flipCard.className = 'flip-card';
+
+            const front = document.createElement('div');
+            front.className = 'flip-card-inner flip-card-front';
+            front.innerHTML = contentFront;
+
+            const back = document.createElement('div');
+            back.className = 'flip-card-inner flip-card-back';
+            back.innerHTML = contentBack;
+
+            flipCard.appendChild(front);
+            flipCard.appendChild(back);
+            flipContainer.appendChild(flipCard);
+
+            flipContainer.addEventListener('dblclick', () => {
+                flipCard.classList.toggle('flipped');
+            });
+
+            cell.appendChild(flipContainer);
+        };
+
+        const generateUniqueBoard = (id, mode) => {
+            const table = document.getElementById(id);
+            const cells = Array.from(table.getElementsByTagName('td'));
+
+            const filledTerms = fillBingoBoard(terms);
+            shuffle(filledTerms);
+            const boardContent = generateBoardContent(filledTerms, mode);
+
+            cells.forEach((cell, index) => {
+                const { term, content } = boardContent[index];
+                cell.innerHTML = '';
+                cell.style.backgroundColor = '';
+                cell.classList.remove('marked', 'blink');
+
+                if (mode.startsWith('Solo')) {
+                    const definitionContent = mode === 'Solo - Terms' ? definitions[term] : term;
+                    const mediaOrText = content;
+                    flipCard(cell, mediaOrText, definitionContent);
+                } else {
+                    cell.innerHTML = content;
+                    cell.onclick = () => {
+                        if (!cell.classList.contains('marked')) {
+                            cell.classList.add('marked');
+                            cell.style.backgroundColor = 'yellow';
+                        } else {
+                            cell.classList.remove('marked');
+                            cell.style.backgroundColor = '';
+                        }
+                    };
+                }
+            });
+        };
+
+        const createTable = (id) => {
+            const table = document.createElement('table');
+            table.id = id;
+            table.className = 'bingoTable';
 
             for (let i = 0; i < 5; i++) {
                 const row = table.insertRow();
                 for (let j = 0; j < 5; j++) {
                     const cell = row.insertCell();
-                    const flipContainer = document.createElement("div");
-                    flipContainer.className = "flip-container";
-                    flipContainer.innerHTML = `
-                        <div class="flipper">
-                            <div class="front"></div>
-                            <div class="back"></div>
-                        </div>
-                    `;
-                    const front = flipContainer.querySelector(".front");
-                    const back = flipContainer.querySelector(".back");
-
-                    let termData;
-                    if (cellsUsed.length < terms.length) {
-                        termData = terms[cellsUsed.length];
-                        cellsUsed.push(termData);
-                    } else {
-                        termData = cellsUsed[Math.floor(Math.random() * cellsUsed.length)];
-                    }
-
-                    if (mode === "Terms") {
-                        front.textContent = termData.term;
-                        back.textContent = termData.definition;
-                    } else {
-                        front.textContent = termData.definition;
-                        back.textContent = termData.term;
-                    }
-
-                    if (termData.media) {
-                        const mediaType = termData.media.endsWith(".mp4") ? "video" : "image";
-                        const mediaElement = mediaType === "video" ? document.createElement("video") : document.createElement("img");
-
-                        mediaElement.src = termData.media;
-                        if (mediaType === "video") {
-                            mediaElement.autoplay = true;
-                            mediaElement.loop = true;
-                            mediaElement.muted = true;
-                            mediaElement.className = "content-video";
-                        } else {
-                            mediaElement.className = "content-image";
-                        }
-
-                        if (Math.random() > 0.5) {
-                            front.textContent = "";
-                            front.appendChild(mediaElement);
-                        } else {
-                            back.textContent = "";
-                            back.appendChild(mediaElement);
-                        }
-                    }
-
-                    cell.appendChild(flipContainer);
-                    cell.addEventListener("click", () => {
-                        flipContainer.classList.toggle("flip");
-                    });
+                    cell.className = 'bingo-cell';
                 }
             }
-
-            container.appendChild(table);
+            return table;
         };
 
-        const setMode = (mode) => {
-            document.getElementById("message").style.display = mode === "Solo" ? "block" : "none";
-            createBoard(mode === "Solo" ? "Terms" : "Definitions");
-        };
+        const setMode = (newMode) => {
+            const container = document.getElementById('bingoContainer');
+            container.innerHTML = '';
 
-        document.getElementById("basicButton").addEventListener("click", () => setMode("Basic"));
-        document.getElementById("challengeButton").addEventListener("click", () => setMode("Challenge"));
-        document.getElementById("soloToggle").addEventListener("click", (e) => {
-            const toggle = e.currentTarget;
-            if (toggle.classList.contains("selected-left")) {
-                toggle.classList.remove("selected-left");
-                toggle.classList.add("selected-right");
-                setMode("Solo Definitions");
+            if (newMode === 'Basic' || newMode === 'Challenge') {
+                const table1 = createTable('bingoTable1');
+                container.appendChild(table1);
+
+                if (newMode === 'Challenge') {
+                    const table2 = createTable('bingoTable2');
+                    container.appendChild(table2);
+                    container.style.display = 'grid';
+                    container.style.gridTemplateColumns = '1fr 1fr';
+                }
+
+                generateUniqueBoard('bingoTable1', newMode);
+                if (newMode === 'Challenge') generateUniqueBoard('bingoTable2', newMode);
             } else {
-                toggle.classList.remove("selected-right");
-                toggle.classList.add("selected-left");
-                setMode("Solo Terms");
+                container.appendChild(createTable('bingoTable'));
+                generateUniqueBoard('bingoTable', newMode);
             }
-        });
 
-        // Initial load
-        setMode("Basic");
+            const buttons = document.querySelectorAll('.modeButton');
+            buttons.forEach(button => button.classList.add('unselected'));
+            document.getElementById(`${newMode.replace(' ', '').toLowerCase()}Button`).classList.remove('unselected');
+            document.getElementById(`${newMode.replace(' ', '').toLowerCase()}Button`).classList.add('selected');
+        };
+
+        document.getElementById('basicButton').addEventListener('click', () => setMode('Basic'));
+        document.getElementById('challengeButton').addEventListener('click', () => setMode('Challenge'));
+        document.getElementById('soloTermsButton').addEventListener('click', () => setMode('Solo - Terms'));
+        document.getElementById('soloDefinitionsButton').addEventListener('click', () => setMode('Solo - Definitions'));
+
+        setMode('Basic');
     </script>
 </body>
-
 </html>
