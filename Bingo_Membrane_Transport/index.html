@@ -106,7 +106,16 @@
 
             cells.forEach((cell, index) => {
                 const term = filledTerms[index];
-                if (termMedia[term] && Math.random() < 0.5) {
+                const termInstances = filledTerms.filter(t => t === term).length;
+
+                if (termMedia[term] && termInstances === 2) {
+                    // Use image/video for one instance if term appears twice
+                    if (cells.filter(c => c.innerHTML === termMedia[term]).length === 0) {
+                        cell.innerHTML = termMedia[term];
+                    } else {
+                        cell.textContent = term;
+                    }
+                } else if (termMedia[term] && Math.random() < 0.5) {
                     cell.innerHTML = termMedia[term];
                 } else {
                     cell.textContent = term;
