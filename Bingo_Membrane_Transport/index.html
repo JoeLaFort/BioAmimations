@@ -5,15 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Membrane Transport Bingo</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        .bingoTable { border-collapse: collapse; margin: 20px auto; }
-        .bingoTable td { border: 1px solid #000; text-align: center; width: 150px; height: 150px; }
+        body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 0; }
+        h1 { font-size: 3vw; margin: 20px 0; }
+        .bingoTable { border-collapse: collapse; margin: 20px auto; width: 90vw; max-width: 600px; }
+        .bingoTable td { border: 1px solid #000; text-align: center; padding: 1vw; width: 18vw; height: 18vw; }
+        .bingoTable img, .bingoTable video { width: 100%; height: 100%; object-fit: contain; }
         .marked { background-color: yellow; }
         .blink { animation: blink-animation 1s steps(2, start) infinite; }
         @keyframes blink-animation { to { visibility: hidden; } }
-        #bingoContainer { display: flex; justify-content: center; flex-wrap: wrap; }
+        #bingoContainer { display: flex; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
         #modeButtons { text-align: center; margin-bottom: 20px; }
-        .modeButton { padding: 10px 20px; margin: 0 10px; cursor: pointer; border: none; }
+        .modeButton { padding: 1vw 2vw; margin: 0 10px; cursor: pointer; border: none; font-size: 2vw; }
         .selected { background-color: blue; color: white; }
         .unselected { background-color: gray; color: black; }
     </style>
@@ -58,7 +60,7 @@
         const generateColors = (numColors) => {
             const colors = [];
             for (let i = 0; i < numColors; i++) {
-                const color = `#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}`;
+                const color = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
                 colors.push(color);
             }
             return colors;
@@ -145,8 +147,6 @@
                 for (let j = 0; j < 5; j++) {
                     const cell = row.insertCell();
                     cell.className = 'bingo-cell';
-                    cell.style.width = "150px";
-                    cell.style.height = "150px";
                 }
             }
             return table;
@@ -178,6 +178,7 @@
                 document.getElementById('challengeButton').classList.remove('unselected');
                 container.style.display = 'grid';
                 container.style.gridTemplateColumns = '1fr 1fr';
+                container.style.gap = "2vw";
             }
         };
 
