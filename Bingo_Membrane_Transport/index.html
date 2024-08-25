@@ -1,163 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Membrane Transport Bingo</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-
-        .bingoTable {
-            border-collapse: collapse;
-            margin: 20px auto;
-        }
-
-        .bingoTable td {
-            border: 1px solid #000;
-            padding: 0;
-            text-align: center;
-            width: 120px;
-            height: 120px;
-        }
-
-        .marked {
-            background-color: yellow;
-        }
-
-        #bingoContainer {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        #modeButtons {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .modeButton {
-            padding: 10px 20px;
-            margin: 0 10px;
-            cursor: pointer;
-            border: none;
-        }
-
-        .selected {
-            background-color: blue;
-            color: white;
-        }
-
-        .unselected {
-            background-color: gray;
-            color: black;
-        }
-
-        video,
-        img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        #bingoContainer {
-            max-width: 90vw;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        #bingoContainer > div {
-            display: flex;
-            margin: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        #bingoContainer table {
-            margin: 10px;
-        }
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .bingoTable { border-collapse: collapse; margin: 20px auto; }
+        .bingoTable td { border: 1px solid #000; text-align: center; width: 150px; height: 150px; }
+        .marked { background-color: yellow; }
+        .blink { animation: blink-animation 1s steps(2, start) infinite; }
+        @keyframes blink-animation { to { visibility: hidden; } }
+        #bingoContainer { display: flex; justify-content: center; flex-wrap: wrap; }
+        #modeButtons { text-align: center; margin-bottom: 20px; }
+        .modeButton { padding: 10px 20px; margin: 0 10px; cursor: pointer; border: none; }
+        .selected { background-color: blue; color: white; }
+        .unselected { background-color: gray; color: black; }
     </style>
 </head>
-
 <body>
-    <h1 style="text-align: center;">Membrane Transport Bingo</h1>
+    <h1>Membrane Transport Bingo</h1>
     <div id="modeButtons">
         <button id="basicButton" class="modeButton selected">Basic</button>
         <button id="challengeButton" class="modeButton unselected">Challenge</button>
     </div>
     <div id="bingoContainer"></div>
-
     <script>
-        const termsAndResources = [
-            { term: "Diffusion" },
-            { term: "Channel Protein" },
-            { term: "Selective Permeability", resource: "https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Selective_Permeability.mp4", type: "video" },
-            { term: "Endocytosis", resource: "https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Endocytosis.mp4", type: "video" },
-            { term: "Phagocytosis" },
-            { term: "Vesicle Transport" },
-            { term: "Aquaporin" },
-            { term: "Phospholipid", resource: "https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Cell_Membrane.png", type: "image" },
-            { term: "Active Transport" },
-            { term: "ATP", resource: "https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/ATP.png", type: "image" },
-            { term: "Concentration Gradient", resource: "https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Concentration_Gradient.png", type: "image" },
-            { term: "Facilitated Diffusion" },
-            { term: "Passive Transport" },
-            { term: "Osmosis", resource: "https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Osmosis.mp4", type: "video" }
+        const terms = [
+            "Diffusion", "Facilitated Diffusion", "Active Transport", "Endocytosis", "Exocytosis", 
+            "Channel Protein", "Carrier Protein", "ATP", "Cell Membrane", "Pinocytosis", "Passive Transport", 
+            "Energy Requirement", "Concentration Gradient", "Equilibrium", "Selective Permeability", 
+            "Aquaporin", "Phagocytosis", "Vesicle Transport", "Phospholipid"
         ];
 
-        // Ensure enough terms/resources to fill all cells
-        while (termsAndResources.length < 25) {
-            termsAndResources.push(...termsAndResources);
-        }
-        termsAndResources.length = 25; // Ensure exactly 25 items
+        const termMedia = {
+            "Diffusion": "<img src='https://joelafort.github.io/BioAmimations/Bingo_Membrane_Transport/Concentration%20Gradient.png' style='width: 100%; height: 100%; object-fit: contain;' />",
+            "Osmosis": "<video src='https://joelafort.github.io/BioAmimations/Bingo_Membrane_Transport/Osmosis.mp4' style='width: 100%; height: 100%; object-fit: cover;' autoplay loop muted></video>",
+            "Cell Membrane": "<img src='https://joelafort.github.io/BioAmimations/Bingo_Membrane_Transport/Cell%20Membrane.png' style='width: 100%; height: 100%; object-fit: cover;' />",
+            "ATP": "<img src='https://joelafort.github.io/BioAmimations/Bingo_Membrane_Transport/ATP.png' style='width: 100%; height: 100%; object-fit: cover;' />",
+            "Endocytosis": "<video src='https://joelafort.github.io/BioAmimations/Bingo_Membrane_Transport/Endocytosis.mp4' style='width: 100%; height: 100%; object-fit: cover;' autoplay loop muted></video>",
+            "Exocytosis": "<video src='https://joelafort.github.io/BioAmimations/Bingo_Membrane_Transport/Exocytosis.mp4' style='width: 100%; height: 100%; object-fit: cover;' autoplay loop muted></video>",
+            "Selective Permeability": "<video src='https://joelafort.github.io/BioAmimations/Bingo_Membrane_Transport/Selective%20Permeability.mp4' style='width: 100%; height: 100%; object-fit: cover;' autoplay loop muted></video>",
+            "Concentration Gradient": "<img src='https://joelafort.github.io/BioAmimations/Bingo_Membrane_Transport/Concentration%20Gradient.png' style='width: 100%; height: 100%; object-fit: contain;' />"
+        };
 
-        // Function to create bingo boards
+        const fillBingoBoard = (terms) => {
+            const board = [];
+            while (board.length < 25) {
+                shuffle(terms);
+                for (let term of terms) {
+                    if (board.length < 25) board.push(term);
+                }
+            }
+            return board;
+        };
+
+        const generateColors = (numColors) => {
+            const colors = [];
+            for (let i = 0; i < numColors; i++) {
+                const color = `#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}`;
+                colors.push(color);
+            }
+            return colors;
+        };
+
+        const colors = generateColors(200);
+        let selectedColor;
+        let mode = 'Basic';
+
+        const bingoAudio = new Audio('https://cdn.glitch.global/57ef4f68-625c-4d2f-ba55-2f6832101365/LD%20Bingo.mp3?v=1722697876282');
+        bingoAudio.loop = true;
+
+        const stopAudio = () => {
+            bingoAudio.pause();
+            bingoAudio.currentTime = 0;
+        };
+
+        const checkBingo = (cells) => {
+            const lines = [
+                [0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], [15, 16, 17, 18, 19], [20, 21, 22, 23, 24],
+                [0, 5, 10, 15, 20], [1, 6, 11, 16, 21], [2, 7, 12, 17, 22], [3, 8, 13, 18, 23], [4, 9, 14, 19, 24],
+                [0, 6, 12, 18, 24], [4, 8, 12, 16, 20]
+            ];
+
+            for (let line of lines) {
+                if (line.every(index => cells[index].classList.contains('marked'))) {
+                    line.forEach(index => {
+                        cells[index].classList.add('blink');
+                    });
+                    bingoAudio.play();
+                    return true;
+                }
+            }
+            return false;
+        };
+
         const generateUniqueBoard = (id) => {
             const table = document.getElementById(id);
             const cells = Array.from(table.getElementsByTagName('td'));
 
-            shuffle(termsAndResources);
+            const filledTerms = fillBingoBoard(terms);
+            shuffle(filledTerms);
+            shuffle(colors);
+            selectedColor = colors[Math.floor(Math.random() * colors.length)];
 
             cells.forEach((cell, index) => {
-                cell.style.backgroundColor = "";
-                cell.classList.remove("marked");
-
-                const item = termsAndResources[index];
-                cell.innerHTML = ""; // Clear any existing content
-
-                if (item.resource) {
-                    const shouldShowTerm = Math.random() < 0.5;
-                    if (shouldShowTerm) {
-                        cell.textContent = item.term;
-                    } else {
-                        if (item.type === "video") {
-                            const video = document.createElement("video");
-                            video.src = item.resource;
-                            video.loop = true;
-                            video.autoplay = true;
-                            video.muted = true;
-                            cell.appendChild(video);
-                        } else if (item.type === "image") {
-                            const img = document.createElement("img");
-                            img.src = item.resource;
-                            cell.appendChild(img);
-                        }
-                    }
+                const term = filledTerms[index];
+                if (termMedia[term] && Math.random() < 0.5) {
+                    cell.innerHTML = termMedia[term];
                 } else {
-                    cell.textContent = item.term;
+                    cell.textContent = term;
                 }
 
+                cell.style.backgroundColor = "";
+                cell.classList.remove("marked", "blink");
+
                 cell.onclick = () => {
-                    cell.classList.toggle("marked");
+                    if (!cell.classList.contains('marked')) {
+                        cell.classList.add('marked');
+                        cell.style.backgroundColor = selectedColor;
+                    } else {
+                        cell.classList.remove('marked');
+                        cell.style.backgroundColor = "";
+                    }
                     checkBingo(cells);
                 };
             });
         };
 
-        // Shuffle function
         const shuffle = (array) => {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -165,7 +135,6 @@
             }
         };
 
-        // Function to create the bingo table
         const createTable = (id) => {
             const table = document.createElement('table');
             table.id = id;
@@ -175,21 +144,21 @@
                 const row = table.insertRow();
                 for (let j = 0; j < 5; j++) {
                     const cell = row.insertCell();
+                    cell.className = 'bingo-cell';
+                    cell.style.width = "150px";
+                    cell.style.height = "150px";
                 }
             }
             return table;
         };
 
-        // Event listeners for mode switching
-        document.getElementById('basicButton').addEventListener('click', () => setMode('Basic'));
-        document.getElementById('challengeButton').addEventListener('click', () => setMode('Challenge'));
-
-        // Set mode function
         const setMode = (newMode) => {
+            stopAudio();
+            mode = newMode;
             const container = document.getElementById('bingoContainer');
             container.innerHTML = '';
 
-            if (newMode === 'Basic') {
+            if (mode === 'Basic') {
                 container.appendChild(createTable('bingoTable'));
                 generateUniqueBoard('bingoTable');
                 document.getElementById('basicButton').classList.add('selected');
@@ -197,30 +166,27 @@
                 document.getElementById('challengeButton').classList.add('unselected');
                 document.getElementById('challengeButton').classList.remove('selected');
             } else {
-                const boardContainer = document.createElement("div");
-                boardContainer.style.display = "flex";
-                boardContainer.style.justifyContent = "center";
-
                 const board1 = createTable('bingoTable1');
                 const board2 = createTable('bingoTable2');
-
-                boardContainer.appendChild(board1);
-                boardContainer.appendChild(board2);
-
-                container.appendChild(boardContainer);
-
+                container.appendChild(board1);
+                container.appendChild(board2);
                 generateUniqueBoard('bingoTable1');
                 generateUniqueBoard('bingoTable2');
                 document.getElementById('basicButton').classList.add('unselected');
                 document.getElementById('basicButton').classList.remove('selected');
                 document.getElementById('challengeButton').classList.add('selected');
                 document.getElementById('challengeButton').classList.remove('unselected');
+                container.style.display = 'grid';
+                container.style.gridTemplateColumns = '1fr 1fr';
             }
         };
 
-        // Initial load
+        document.getElementById('basicButton').addEventListener('click', () => setMode('Basic'));
+        document.getElementById('challengeButton').addEventListener('click', () => setMode('Challenge'));
+
         setMode('Basic');
+
+        window.addEventListener('beforeunload', stopAudio);
     </script>
 </body>
-
 </html>
