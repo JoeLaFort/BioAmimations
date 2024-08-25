@@ -104,22 +104,15 @@
             shuffle(colors);
             selectedColor = colors[Math.floor(Math.random() * colors.length)];
 
-            const termOccurrences = {};
-            terms.forEach(term => termOccurrences[term] = 0);
+            const usedMedia = {}; // To track if media is used only once per term
 
             cells.forEach((cell, index) => {
                 const term = filledTerms[index];
-                termOccurrences[term]++;
-
-                // If a term has been used twice, display the image/video for one instance and text for the other.
-                if (termOccurrences[term] === 2 && termMedia[term]) {
-                    if (cells.filter(c => c.innerHTML === termMedia[term]).length === 0) {
-                        cell.innerHTML = termMedia[term];
-                    } else {
-                        cell.textContent = term;
-                    }
-                } else if (termMedia[term] && Math.random() < 0.5 && termOccurrences[term] === 1) {
+                
+                // If the term has media and hasn't used the media yet, display it as media
+                if (termMedia[term] && !usedMedia[term]) {
                     cell.innerHTML = termMedia[term];
+                    usedMedia[term] = true;
                 } else {
                     cell.textContent = term;
                 }
