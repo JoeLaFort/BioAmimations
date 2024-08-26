@@ -7,13 +7,10 @@
     <style>
         body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 0; }
         .bingoTable { border-collapse: collapse; margin: 20px auto; }
-        .bingoTable td { border: 1px solid #000; text-align: center; width: 150px; height: 150px; position: relative; }
-        .flip-container { perspective: 1000px; }
-        .flip-container .flip-inner { transition: transform 0.6s; transform-style: preserve-3d; position: relative; width: 100%; height: 100%; }
-        .flip-container.flipped .flip-inner { transform: rotateY(180deg); }
-        .flip-front, .flip-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; }
-        .flip-back { transform: rotateY(180deg); }
+        .bingoTable td { border: 1px solid #000; text-align: center; }
         .marked { background-color: yellow; }
+        .blink { animation: blink-animation 1s steps(2, start) infinite; }
+        @keyframes blink-animation { to { visibility: hidden; } }
         #bingoContainer { display: flex; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
         #modeButtons { text-align: center; margin-bottom: 20px; }
         .modeButton { padding: 10px 20px; margin: 0 10px; cursor: pointer; border: none; }
@@ -26,11 +23,6 @@
     <div id="modeButtons">
         <button id="basicButton" class="modeButton selected">Basic</button>
         <button id="challengeButton" class="modeButton unselected">Challenge</button>
-        <button id="soloTermsButton" class="modeButton unselected">Solo - Terms</button>
-        <button id="soloDefinitionsButton" class="modeButton unselected">Solo - Definitions</button>
-    </div>
-    <div id="messageContainer" style="display: none; margin-bottom: 20px;">
-        <p>Click each cell to show its answer.</p>
     </div>
     <div id="bingoContainer"></div>
     <script>
@@ -41,98 +33,111 @@
             "Aquaporin", "Phagocytosis", "Vesicle Transport", "Osmosis"
         ];
 
-        const definitions = {
-            "Diffusion": "Movement of particles from high to low concentration.",
-            "Facilitated Diffusion": "Movement across membrane via transport proteins.",
-            "Active Transport": "Energy-required transport against concentration gradient.",
-            // Add definitions for all terms...
-        };
-
         const termMedia = {
             "Osmosis": "<video src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Osmosis.mp4' style='width: 100%; height: 100%; object-fit: cover;' autoplay loop muted></video>",
             "Phospholipid Bilayer": "<img src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Phospholipid%20Bilayer.png' style='width: 100%; height: 100%; object-fit: cover;' />",
             "ATP": "<img src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/ATP.png' style='width: 100%; height: 100%; object-fit: cover;' />",
-            // Add more media entries if needed...
+            "Endocytosis": "<video src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Endocytosis.mp4' style='width: 100%; height: 100%; object-fit: cover;' autoplay loop muted></video>",
+            "Exocytosis": "<video src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Exocytosis.mp4' style='width: 100%; height: 100%; object-fit: cover;' autoplay loop muted></video>",
+            "Selective Permeability": "<video src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Selective%20Permeability.mp4' style='width: 100%; height: 100%; object-fit: cover;' autoplay loop muted></video>",
+            "Concentration Gradient": "<img src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Concentration%20Gradient.png' style='width: 100%; height: 100%; object-fit: contain;' />"
         };
 
+        const fillBingoBoard = (terms) => {
+            const board = [...terms];
+            while (board.length < 25) {
+                const remainingTerms = terms.filter(term => board.filter(t => t === term).length < 2);
+                shuffle(remainingTerms);
+                for (let term of remainingTerms) {
+                    if (board.length < 25) board.push(term);
+                }
+            }
+            return board;
+        };
+
+        const generateColors = (numColors) => {
+            const colors = [];
+            for (let i = 0; i < numColors; i++) {
+                const color = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
+                colors.push(color);
+            }
+            return colors;
+        };
+
+        const colors = generateColors(200);
+        let selectedColor;
         let mode = 'Basic';
+
+        const bingoAudio = new Audio('https://cdn.glitch.global/57ef4f68-625c-4d2f-ba55-2f6832101365/LD%20Bingo.mp3?v=1722697876282');
+        bingoAudio.loop = true;
+
+        const stopAudio = () => {
+            bingoAudio.pause();
+            bingoAudio.currentTime = 0;
+        };
+
+        const checkBingo = (cells) => {
+            const lines = [
+                [0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], [15, 16, 17, 18, 19], [20, 21, 22, 23, 24],
+                [0, 5, 10, 15, 20], [1, 6, 11, 16, 21], [2, 7, 12, 17, 22], [3, 8, 13, 18, 23], [4, 9, 14, 19],
+                [0, 6, 12, 18, 24], [4, 8, 12, 16, 20]
+            ];
+
+            for (let line of lines) {
+                if (line.every(index => cells[index].classList.contains('marked'))) {
+                    line.forEach(index => {
+                        cells[index].classList.add('blink');
+                    });
+                    bingoAudio.play();
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        const generateUniqueBoard = (id) => {
+            const table = document.getElementById(id);
+            const cells = Array.from(table.getElementsByTagName('td'));
+
+            const filledTerms = fillBingoBoard(terms);
+            shuffle(filledTerms);
+            shuffle(colors);
+            selectedColor = colors[Math.floor(Math.random() * colors.length)];
+
+            const usedMedia = {}; // To track if media is used only once per term
+
+            cells.forEach((cell, index) => {
+                const term = filledTerms[index];
+                
+                // If the term has media and hasn't used the media yet, display it as media
+                if (termMedia[term] && !usedMedia[term]) {
+                    cell.innerHTML = termMedia[term];
+                    usedMedia[term] = true;
+                } else {
+                    cell.textContent = term;
+                }
+
+                cell.style.backgroundColor = "";
+                cell.classList.remove("marked", "blink");
+
+                cell.onclick = () => {
+                    if (!cell.classList.contains('marked')) {
+                        cell.classList.add('marked');
+                        cell.style.backgroundColor = selectedColor;
+                    } else {
+                        cell.classList.remove('marked');
+                        cell.style.backgroundColor = "";
+                    }
+                    checkBingo(cells);
+                };
+            });
+        };
 
         const shuffle = (array) => {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [array[i], array[j]] = [array[j], array[i]];
             }
-        };
-
-        const generateUniqueBoard = (id, showDefinitions = false, soloMode = false) => {
-            const table = document.getElementById(id);
-            const cells = Array.from(table.getElementsByTagName('td'));
-
-            shuffle(terms);
-
-            cells.forEach((cell, index) => {
-                const term = terms[index % terms.length];
-                const frontContent = termMedia[term] || term;
-                const backContent = showDefinitions ? definitions[term] || term : term;
-
-                if (soloMode) {
-                    cell.innerHTML = `
-                        <div class="flip-container">
-                            <div class="flip-inner">
-                                <div class="flip-front">${frontContent}</div>
-                                <div class="flip-back">${backContent}</div>
-                            </div>
-                        </div>
-                    `;
-                    cell.querySelector('.flip-container').onclick = () => {
-                        cell.querySelector('.flip-container').classList.toggle('flipped');
-                    };
-                } else {
-                    cell.textContent = term;
-                }
-            });
-        };
-
-        const setMode = (newMode) => {
-            mode = newMode;
-            const container = document.getElementById('bingoContainer');
-            container.innerHTML = '';
-            document.getElementById('messageContainer').style.display = 'none';
-
-            if (mode === 'Basic') {
-                container.appendChild(createTable('bingoTable'));
-                generateUniqueBoard('bingoTable');
-                updateButtonStates('basicButton');
-            } else if (mode === 'Challenge') {
-                container.style.display = 'grid';
-                container.style.gridTemplateColumns = '1fr 1fr';
-                const board1 = createTable('bingoTable1');
-                const board2 = createTable('bingoTable2');
-                container.appendChild(board1);
-                container.appendChild(board2);
-                generateUniqueBoard('bingoTable1');
-                generateUniqueBoard('bingoTable2');
-                updateButtonStates('challengeButton');
-            } else if (mode === 'Solo - Terms') {
-                document.getElementById('messageContainer').style.display = 'block';
-                container.appendChild(createTable('bingoTableSolo'));
-                generateUniqueBoard('bingoTableSolo', false, true);
-                updateButtonStates('soloTermsButton');
-            } else if (mode === 'Solo - Definitions') {
-                document.getElementById('messageContainer').style.display = 'block';
-                container.appendChild(createTable('bingoTableSolo'));
-                generateUniqueBoard('bingoTableSolo', true, true);
-                updateButtonStates('soloDefinitionsButton');
-            }
-        };
-
-        const updateButtonStates = (selectedButtonId) => {
-            ['basicButton', 'challengeButton', 'soloTermsButton', 'soloDefinitionsButton'].forEach(buttonId => {
-                document.getElementById(buttonId).classList.remove('selected');
-                document.getElementById(buttonId).classList.add('unselected');
-            });
-            document.getElementById(selectedButtonId).classList.add('selected');
-            document.getElementById(selectedButtonId).classList.remove('unselected');
         };
 
         const createTable = (id) => {
@@ -145,17 +150,48 @@
                 for (let j = 0; j < 5; j++) {
                     const cell = row.insertCell();
                     cell.className = 'bingo-cell';
+                    cell.style.width = "auto";
+                    cell.style.height = "auto";
                 }
             }
             return table;
         };
 
+        const setMode = (newMode) => {
+            stopAudio();
+            mode = newMode;
+            const container = document.getElementById('bingoContainer');
+            container.innerHTML = '';
+
+            if (mode === 'Basic') {
+                container.appendChild(createTable('bingoTable'));
+                generateUniqueBoard('bingoTable');
+                document.getElementById('basicButton').classList.add('selected');
+                document.getElementById('basicButton').classList.remove('unselected');
+                document.getElementById('challengeButton').classList.add('unselected');
+                document.getElementById('challengeButton').classList.remove('selected');
+            } else {
+                const board1 = createTable('bingoTable1');
+                const board2 = createTable('bingoTable2');
+                container.appendChild(board1);
+                container.appendChild(board2);
+                generateUniqueBoard('bingoTable1');
+                generateUniqueBoard('bingoTable2');
+                document.getElementById('basicButton').classList.add('unselected');
+                document.getElementById('basicButton').classList.remove('selected');
+                document.getElementById('challengeButton').classList.add('selected');
+                document.getElementById('challengeButton').classList.remove('unselected');
+                container.style.display = 'grid';
+                container.style.gridTemplateColumns = '1fr 1fr';
+            }
+        };
+
         document.getElementById('basicButton').addEventListener('click', () => setMode('Basic'));
         document.getElementById('challengeButton').addEventListener('click', () => setMode('Challenge'));
-        document.getElementById('soloTermsButton').addEventListener('click', () => setMode('Solo - Terms'));
-        document.getElementById('soloDefinitionsButton').addEventListener('click', () => setMode('Solo - Definitions'));
 
         setMode('Basic');
+
+        window.addEventListener('beforeunload', stopAudio);
     </script>
 </body>
 </html>
