@@ -6,15 +6,14 @@
     <title>Membrane Transport Bingo</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 0; }
-        .bingoTable { border-collapse: collapse; margin: 20px auto; perspective: 1000px; }
+        .bingoTable { border-collapse: collapse; margin: 20px auto; }
         .bingoTable td { border: 1px solid #000; text-align: center; width: 150px; height: 150px; position: relative; }
-        .flip-container { width: 100%; height: 100%; position: absolute; transition: transform 0.6s; transform-style: preserve-3d; }
-        .flip-container.flipped { transform: rotateY(180deg); }
-        .flip-front, .flip-back { width: 100%; height: 100%; position: absolute; backface-visibility: hidden; }
+        .flip-container { perspective: 1000px; }
+        .flip-container .flip-inner { transition: transform 0.6s; transform-style: preserve-3d; position: relative; width: 100%; height: 100%; }
+        .flip-container.flipped .flip-inner { transform: rotateY(180deg); }
+        .flip-front, .flip-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; }
         .flip-back { transform: rotateY(180deg); }
         .marked { background-color: yellow; }
-        .blink { animation: blink-animation 1s steps(2, start) infinite; }
-        @keyframes blink-animation { to { visibility: hidden; } }
         #bingoContainer { display: flex; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
         #modeButtons { text-align: center; margin-bottom: 20px; }
         .modeButton { padding: 10px 20px; margin: 0 10px; cursor: pointer; border: none; }
@@ -53,23 +52,10 @@
             "Osmosis": "<video src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Osmosis.mp4' style='width: 100%; height: 100%; object-fit: cover;' autoplay loop muted></video>",
             "Phospholipid Bilayer": "<img src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Phospholipid%20Bilayer.png' style='width: 100%; height: 100%; object-fit: cover;' />",
             "ATP": "<img src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/ATP.png' style='width: 100%; height: 100%; object-fit: cover;' />",
-            "Endocytosis": "<video src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Endocytosis.mp4' style='width: 100%; height: 100%; object-fit: cover;' autoplay loop muted></video>",
-            "Exocytosis": "<video src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Exocytosis.mp4' style='width: 100%; height: 100%; object-fit: cover;' autoplay loop muted></video>",
-            "Selective Permeability": "<video src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Selective%20Permeability.mp4' style='width: 100%; height: 100%; object-fit: cover;' autoplay loop muted></video>",
-            "Concentration Gradient": "<img src='https://joelafort.github.io/BioAnimations/Bingo_Membrane_Transport/Concentration%20Gradient.png' style='width: 100%; height: 100%; object-fit: contain;' />"
+            // Add more media entries if needed...
         };
 
-        const fillBingoBoard = (terms) => {
-            const board = [...terms];
-            while (board.length < 25) {
-                const remainingTerms = terms.filter(term => board.filter(t => t === term).length < 2);
-                shuffle(remainingTerms);
-                for (let term of remainingTerms) {
-                    if (board.length < 25) board.push(term);
-                }
-            }
-            return board;
-        };
+        let mode = 'Basic';
 
         const shuffle = (array) => {
             for (let i = array.length - 1; i > 0; i--) {
@@ -78,51 +64,31 @@
             }
         };
 
-        let mode = 'Basic';
-        let selectedColor;
-
         const generateUniqueBoard = (id, showDefinitions = false, soloMode = false) => {
             const table = document.getElementById(id);
             const cells = Array.from(table.getElementsByTagName('td'));
 
-            const filledTerms = fillBingoBoard(terms);
-            shuffle(filledTerms);
+            shuffle(terms);
 
             cells.forEach((cell, index) => {
-                const term = filledTerms[index];
-                let frontContent, backContent;
-
-                if (termMedia[term]) {
-                    frontContent = termMedia[term];
-                    backContent = showDefinitions ? definitions[term] || term : term;
-                } else {
-                    frontContent = showDefinitions ? definitions[term] || term : term;
-                    backContent = showDefinitions ? term : definitions[term] || term;
-                }
+                const term = terms[index % terms.length];
+                const frontContent = termMedia[term] || term;
+                const backContent = showDefinitions ? definitions[term] || term : term;
 
                 if (soloMode) {
                     cell.innerHTML = `
                         <div class="flip-container">
-                            <div class="flip-front">${frontContent}</div>
-                            <div class="flip-back">${backContent}</div>
+                            <div class="flip-inner">
+                                <div class="flip-front">${frontContent}</div>
+                                <div class="flip-back">${backContent}</div>
+                            </div>
                         </div>
                     `;
-                    const flipContainer = cell.querySelector('.flip-container');
-                    cell.onclick = () => {
-                        flipContainer.classList.toggle('flipped');
+                    cell.querySelector('.flip-container').onclick = () => {
+                        cell.querySelector('.flip-container').classList.toggle('flipped');
                     };
                 } else {
-                    cell.textContent = frontContent;
-                    cell.onclick = () => {
-                        if (!cell.classList.contains('marked')) {
-                            cell.classList.add('marked');
-                            cell.style.backgroundColor = selectedColor;
-                        } else {
-                            cell.classList.remove('marked');
-                            cell.style.backgroundColor = "";
-                        }
-                        checkBingo(cells);
-                    };
+                    cell.textContent = term;
                 }
             });
         };
