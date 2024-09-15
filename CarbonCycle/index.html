@@ -3,20 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Update the title of the page here -->
     <title>SWF Player with Ruffle</title>
-
-    <!-- Load Ruffle directly from the CDN -->
     <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
 </head>
 <body>
-    <!-- Update the page heading/title here -->
-    <h1>Carbon Cycle</h1>
-
+    <h1>Carbon Cycle Animation</h1>
     <div>
-        <!-- Embed the SWF file using the <object> tag for Ruffle compatibility -->
-        <object type="application/x-shockwave-flash" data="https://www.windows2universe.org/earth/climate/carbon_cycle.html" width="800" height="600">
-            <!-- Fallback content if Ruffle does not work -->
+        <!-- Embed the SWF file using a CORS proxy -->
+        <object type="application/x-shockwave-flash" data="https://cors-anywhere.herokuapp.com/https://www.windows2universe.org/earth/climate/carbon_cycle_swf.swf" width="800" height="600">
+            <param name="movie" value="https://www.windows2universe.org/earth/climate/carbon_cycle_swf.swf">
             <p>Your browser does not support Flash. Please enable Ruffle to view this animation.</p>
         </object>
     </div>
