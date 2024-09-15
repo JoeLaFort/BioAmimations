@@ -6,7 +6,7 @@
     <!-- Update the title of the page here -->
     <title>SWF Player with Ruffle</title>
 
-    <!-- Ruffle script (You can embed a modified version if you have it locally) -->
+    <!-- Load Ruffle directly from the CDN -->
     <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
 </head>
 <body>
@@ -14,10 +14,11 @@
     <h1>Carbon Cycle</h1>
 
     <div>
-        <!-- Embed the SWF file -->
-        <!-- Update the link to the SWF file here if you need to change the Flash animation -->
-        <embed src="https://www.windows2universe.org/earth/climate/carbon_cycle.html" width="800" height="600">
+        <!-- Embed the SWF file using the <object> tag for Ruffle compatibility -->
+        <object type="application/x-shockwave-flash" data="https://www.windows2universe.org/earth/climate/carbon_cycle.html" width="800" height="600">
+            <!-- Fallback content if Ruffle does not work -->
+            <p>Your browser does not support Flash. Please enable Ruffle to view this animation.</p>
+        </object>
     </div>
 </body>
 </html>
-
